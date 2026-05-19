@@ -1,0 +1,37 @@
+pipeline {
+
+    agent any
+
+    tools {
+        jdk 'jdk21'
+        maven 'maven3'
+    }
+
+    stages {
+
+        stage('Git Checkout') {
+            steps {
+                git 'https://github.com/tulasisagar/travelbookstall.git'
+            }
+        }
+
+        stage('Maven Build') {
+            steps {
+                sh 'mvn clean package'
+            }
+        }
+
+        stage('Docker Build') {
+            steps {
+                sh 'docker build -t travelbookstall .'
+            }
+        }
+
+        stage('Docker Run') {
+            steps {
+                sh 'docker rm -f travel-app || true'
+                sh 'docker run -d -p 8082:8081 --name travel-app travelbookstall'
+            }
+        }
+    }
+}
